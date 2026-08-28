@@ -1,0 +1,25 @@
+services:
+  banana-ssh:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: banana-ssh
+    restart: unless-stopped
+    ports:
+      - "2222:2222" # Map to port 22 on host if running on dedicated SSH IP: "22:2222"
+    environment:
+      - PORT=2222
+      - HOST=0.0.0.0
+      - SSH_KEY_PATH=/data/banana_ed25519
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - banana_ssh_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 2222 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  banana_ssh_data:
+    driver: local
