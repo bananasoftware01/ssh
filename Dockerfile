@@ -39,5 +39,5 @@ ENV PORT=2222 \
 EXPOSE 2222
 
 VOLUME ["/data"]
-
 ENTRYPOINT ["/usr/local/bin/banana-ssh"]
+CMD ["serve"]

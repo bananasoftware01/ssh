@@ -22,7 +22,25 @@ Built with [Charm](https://charm.sh) **Wish**, **Bubble Tea**, and **Lipgloss**.
 
 ## 🚀 Quick Start
 
-### 1. Connect via SSH
+### 1. Instant Run via `curl` (No install needed)
+
+Run the interactive terminal landing page directly in your shell:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bananasoftware01/ssh/main/run.sh | bash
+```
+
+### 2. Install CLI Binary (`banana`)
+
+To install the `banana` command permanently to `~/.local/bin`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bananasoftware01/ssh/main/run.sh | bash -s -- --install
+```
+
+Then run `banana` anytime from your terminal!
+
+### 3. Connect via SSH
 
 ```bash
 # Connect to production SSH server
@@ -32,25 +50,18 @@ ssh bananasoftware.net
 ssh localhost -p 2222
 ```
 
-### 2. Run Local TUI Mode
+### 4. Build & Run from Source
 
 ```bash
-cd ssh
-go run ./cmd/banana-ssh -tui
-# or
+# Run interactive TUI
 make tui
-```
 
-### 3. Run SSH Server
-
-```bash
-cd ssh
-go run ./cmd/banana-ssh -port 2222
-# or
+# Run SSH server locally
 make run
-```
 
----
+# Build cross-platform binaries
+make release-build
+```
 
 ## ⌨ Keybindings
 

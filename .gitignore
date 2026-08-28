@@ -1,0 +1,13 @@
+# Binaries
+banana
+banana-ssh
+banana-ssh-arm64
+dist/
+bin/
+
+# Local keys & data
+.ssh/
+keys/
+
+# OS artifacts
+.DS_Store

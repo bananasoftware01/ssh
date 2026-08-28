@@ -18,18 +18,55 @@ var (
 )
 
 func main() {
+	// Help / Usage
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "version", "-v", "--version":
+			fmt.Printf("Banana Software CLI / SSH v%s (%s, built %s)\n", Version, Commit, Date)
+			return
+		case "help", "-h", "--help":
+			printUsage()
+			return
 		case "tui", "local", "run":
 			runLocalTUI()
-			return
-		case "version", "-v", "--version":
-			fmt.Printf("Banana Software SSH v%s (%s, built %s)\n", Version, Commit, Date)
 			return
 		}
 	}
 
-	// Server mode
+	// Determine whether to run in server mode or TUI mode
+	isServer := false
+	for _, arg := range os.Args[1:] {
+		if arg == "serve" || arg == "server" || arg == "-server" || arg == "--server" ||
+			arg == "-port" || arg == "--port" || arg == "-host" || arg == "--host" {
+			isServer = true
+			break
+		}
+	}
+
+	// If explicitly asked for server or running server subcommand
+	if isServer {
+		runServer()
+		return
+	}
+
+	// Default: Run interactive local TUI
+	runLocalTUI()
+}
+
+func printUsage() {
+	fmt.Printf("🍌 Banana Software CLI v%s\n\n", Version)
+	fmt.Println("Usage:")
+	fmt.Println("  banana              Run interactive landing page in terminal (default)")
+	fmt.Println("  banana serve        Start SSH server")
+	fmt.Println("  banana version      Print version info")
+	fmt.Println("  banana help         Show this help message")
+	fmt.Println("\nServer options:")
+	fmt.Println("  -host string        SSH server bind host (default: 0.0.0.0)")
+	fmt.Println("  -port int           SSH server listen port (default: 2222)")
+	fmt.Println("  -key string         Path to SSH host private key")
+}
+
+func runServer() {
 	cfg := server.DefaultConfig()
 
 	// Environment variable overrides
@@ -53,27 +90,19 @@ func main() {
 		cfg.HostKeyPath = envKey
 	}
 
-	// CLI flags
-	var hostFlag string
-	var portFlag int
-	var keyFlag string
-	var tuiFlag bool
-
-	flag.StringVar(&hostFlag, "host", cfg.Host, "SSH server bind host")
-	flag.IntVar(&portFlag, "port", cfg.Port, "SSH server listen port")
-	flag.StringVar(&keyFlag, "key", cfg.HostKeyPath, "Path to SSH host private key")
-	flag.BoolVar(&tuiFlag, "tui", false, "Run in interactive local TUI mode without SSH server")
-
-	flag.Parse()
-
-	if tuiFlag {
-		runLocalTUI()
-		return
+	// Filter out "serve" / "server" subcommands before parsing flags
+	var args []string
+	for _, a := range os.Args[1:] {
+		if a != "serve" && a != "server" {
+			args = append(args, a)
+		}
 	}
 
-	cfg.Host = hostFlag
-	cfg.Port = portFlag
-	cfg.HostKeyPath = keyFlag
+	fs := flag.NewFlagSet("serve", flag.ExitOnError)
+	fs.StringVar(&cfg.Host, "host", cfg.Host, "SSH server bind host")
+	fs.IntVar(&cfg.Port, "port", cfg.Port, "SSH server listen port")
+	fs.StringVar(&cfg.HostKeyPath, "key", cfg.HostKeyPath, "Path to SSH host private key")
+	_ = fs.Parse(args)
 
 	fmt.Println("🍌 Banana Software SSH Terminal")
 	fmt.Printf("Starting SSH server on %s:%d (Host key: %s)\n", cfg.Host, cfg.Port, cfg.HostKeyPath)
